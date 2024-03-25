@@ -11,7 +11,7 @@ using NewBannerchi.Data;
 namespace NewBannerchi.Data.Migrations
 {
     [DbContext(typeof(NewBannerchiContext))]
-    [Migration("20240324212855_InitialCreate")]
+    [Migration("20240325215844_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -70,8 +70,8 @@ namespace NewBannerchi.Data.Migrations
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Designer")
                         .IsRequired()
@@ -80,13 +80,13 @@ namespace NewBannerchi.Data.Migrations
 
                     b.Property<string>("DownloadCount")
                         .IsRequired()
-                        .HasMaxLength(6)
-                        .HasColumnType("nvarchar(6)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("HeaderUrl")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -95,8 +95,8 @@ namespace NewBannerchi.Data.Migrations
 
                     b.Property<string>("PackageUrl")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("Price")
                         .HasColumnType("int");
@@ -108,8 +108,8 @@ namespace NewBannerchi.Data.Migrations
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasMaxLength(2)
-                        .HasColumnType("nvarchar(2)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 

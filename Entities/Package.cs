@@ -14,11 +14,11 @@ public class Package
     [Required]
     public required string Designer { get; set; }
    
-    [MaxLength(2)]
+    [MaxLength(50)]
     [Required]
     public required string Type { get; set; }
   
-    [MaxLength(6)]
+    [MaxLength(50)]
     [Required]
     public required string DownloadCount { get; set; }
     
@@ -28,18 +28,18 @@ public class Package
   
     [Url]
     [Required]
-    [MaxLength(100)]
+    [MaxLength(200)]
     public required string HeaderUrl { get; set; }
   
     [Url]
-    [MaxLength(100)]
+    [MaxLength(200)]
     [Required]
     public required string PackageUrl { get; set; }
    
     [Required]
     public int Price { get; set; }
   
-    [MaxLength(20)]
+    [MaxLength(100)]
     [Required]
-    public required List<string> Category { get; set; }
+    public required string Category { get; set; }
 }

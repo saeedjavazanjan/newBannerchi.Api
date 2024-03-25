@@ -55,4 +55,6 @@ app.UseAuthorization();
 app.MapUsersEndPoints();
 app.UseRateLimiter();
 app.MapPackagesEndpoints();
+app.MapCategoriesEndpoints();
+app.MapOccasionEndpoints();
 app.Run();

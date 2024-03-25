@@ -14,12 +14,23 @@ public static class PackagesEndpoints
 
 
         var group = routes.MapGroup("/packages").WithParameterValidation();
-
-        /*group.MapGet("/", async (IRepository repository,int pageNumber,int pageSize) 
-            => (await repository.GetAllAsync())
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .Select(package=>package.AsDto()));*/
+        
+        
+        //old version
+        routes.MapGet("/show_news.php", async (IRepository repository, string occasion)
+            =>
+        {
+            if (occasion == "همه")
+            {
+                return (await repository.GetAllAsync())
+                    .Select(package => package.AsDto());  
+            }
+            return (await repository.GetWithCategoryAsync(occasion))
+                .Select(package=>package.AsDto());
+        });
+        
+        
+        
         
         
         group.MapGet("/posters", async (IRepository repository,int pageNumber,int pageSize) 
@@ -56,88 +67,49 @@ public static class PackagesEndpoints
                 int pageSize)
             =>
         {
-            IEnumerable<Package
-            > searchedPosts = await repository.SearchAsync(query);
+            IEnumerable<Package> searchedPosts = await repository.SearchAsync(query);
             return searchedPosts is not null ? Results.Ok(searchedPosts
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize).Select(post=>post.AsDto())):Results.NotFound();
         }).WithName(SearchPost);
         
-           /*
+        
            group.MapPost("/uploadPackage",async (
             IRepository iRepository,
              AddPackageDto addPackageDto,
             ClaimsPrincipal? user
             )=>{
           var userId= user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+          var userPhone= user?.FindFirst(ClaimTypes.Email)?.Value;
+
           User? currentUser = await iRepository.GetUserAsync(Int32.Parse(userId));
+          
           if(currentUser==null){
               return Results.NotFound(new{error="کاربر یافت نشد."}); 
           }
-          var userName = currentUser.UserName;
-          if (userId.Equals(currentUser.UserId.ToString()))
+          var userName = currentUser.Name;
+          if (userPhone=="09193480263")
           {
              
               
               
-              Post post=new (){
-                  Title= postDto.Title,
-                  Category = postDto.Category,
-                  PostType= postDto.PostType,
-                  Author= userName,
-                  AuthorId= int.Parse(userId),
-                  AuthorAvatar = currentUser.Avatar,
-                  FeaturedImages= [],
-                  Like = 0,
-                  Video = "",
-                  Description = postDto.Description,
-                  DataAdded = DateTime.Now,
-                  LongDataAdded = postDto.LongDataAdded,
-                  HaveProduct = postDto.HaveProduct
+              Package package= new (){
+                  Name= addPackageDto.Name,
+                  Designer = addPackageDto.Designer,
+                  Type= addPackageDto.Type,
+                  DownloadCount = addPackageDto.DownloadCount,
+                  Samples = addPackageDto.Samples,
+                  HeaderUrl = addPackageDto.HeaderUrl,
+                  PackageUrl = addPackageDto.PackageUrl,
+                  Price = addPackageDto.Price,
+                  Category = addPackageDto.Category
 
               };
-              await iRepository.CreateAsync(post);
+              await iRepository.CreateAsync(package);
 
-              Post? existedPost = await iRepository.GetAsync(post.Id);
-              
-              if (postDto.Video != null && postDto.PostType=="video")
-              {
-                  var fileResult =
-                      iFileService.SavePostVideo(postDto.Video,post.Id.ToString());
-                  if (fileResult.Item1 == 1)
-                  {
-                      existedPost!.Video = fileResult.Item2; 
-                  }
-                  else
-                  {
-                      return Results.Conflict(new { error = fileResult.Item2});
-                  }
-
-              }
-
-              if (postDto.FeaturedImages != null && 
-                  postDto.PostType == "image" &&
-                  postDto.FeaturedImages.Count>0
-
-                  )
-              {
-                  var fileResult = 
-                      iFileService.SavePostImages(postDto.FeaturedImages, post.Id.ToString());
-                  if (fileResult.Item1==1)
-                  {
-                      existedPost!.FeaturedImages = fileResult.Item2;
-                  }
-              }
-              
-
-              await iRepository.UpdateAsync(existedPost!);
-
-              return Results.CreatedAtRoute(GetPostEndPointName,new{post.Id},post);
-              
-              
+              return Results.Ok();
           }
-
-          return Results.Conflict( new { error="شما دسترسی به این کاربر ندارید"});
+          return Results.Conflict( new { error="شما دسترسی ندارید"});
 
 
 
@@ -146,74 +118,59 @@ public static class PackagesEndpoints
         group.MapPut("update/{id}",async (
                 IRepository repository,
                 int id, 
-                UpdatePostDto updatePostDto,
+                AddPackageDto updatePackageDto,
                 ClaimsPrincipal? user)=>
             {
-                var userId= user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                User? currentUser = await repository.GetUserAsync(Int32.Parse(userId));
+                var userPhone= user?.FindFirst(ClaimTypes.Email)?.Value;
+                
+                Package? existedPackage = await repository.GetAsync(id);
 
-                Post? existedPost = await repository.GetAsync(id);
-
-                if(existedPost==null){
+                if(existedPackage==null){
                     return Results.NotFound(new{error="پست مورد نظر یافت نشد"}); 
                 }
 
-                if (existedPost.AuthorId != Int32.Parse(userId))
+                if (userPhone == "09193480263")
                 {
-                    return Results.Unauthorized();
-                }
-
-                existedPost.Title=updatePostDto.Title;
-                existedPost.Category = updatePostDto.Category;
-                existedPost.AuthorAvatar = currentUser!.Avatar;
-                existedPost.Description=updatePostDto.Description;
-                existedPost.DataAdded=DateTime.Now;
-                existedPost.LongDataAdded=updatePostDto.LongDataAdded;
-                existedPost.HaveProduct=updatePostDto.HaveProduct;
+                    existedPackage.Name=updatePackageDto.Name;
+                    existedPackage.Category = updatePackageDto.Category;
+                    existedPackage.Designer =updatePackageDto.Designer ;
+                    existedPackage.Type=updatePackageDto.Type;
+                    existedPackage.DownloadCount=updatePackageDto.DownloadCount;
+                    existedPackage.Samples=updatePackageDto.Samples;
+                    existedPackage.HeaderUrl=updatePackageDto.HeaderUrl;
+                    existedPackage.PackageUrl=updatePackageDto.PackageUrl;
+                    existedPackage.Price=updatePackageDto.Price;
                 
-                await  repository.UpdateAsync(existedPost);
-                return Results.Ok("با موفقیت به روز رسانی شد");   
+                    await  repository.UpdateAsync(existedPackage);
+                    return Results.Ok("با موفقیت به روز رسانی شد");   
+                }
+                return Results.Conflict( new { error="شما دسترسی ندارید"});
+
+             
 
             }
         ).RequireAuthorization();
 
         group.MapDelete("/{id}",async (
-            IFileService fileService,
             IRepository repository,
             int id,
             ClaimsPrincipal? user
             )=>
         {
-            var userId= user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            Post? post =await repository.GetAsync(id);
-
-            if (post.AuthorId == Int32.Parse(userId))
+            var userPhone= user?.FindFirst(ClaimTypes.Email)?.Value;
+            if (userPhone == "09193480263")
             {
-                if(post is not null){
-                    if (post.PostType == "image")
-                    {
-                        fileService.DeletePostImage(id.ToString());
-                    }
-                    else if(post.PostType == "video")
-                    {
-                        fileService.DeletePostVideo(id.ToString());
-                    }
-                    await repository.DeleteAsync(id);
-
-                    
-                    
-                    return Results.Ok();
-                }
-                return Results.NoContent();   
-
+                var package =await repository.GetAsync(id);
+                if (package is null) return Results.NoContent();
+                await repository.DeleteAsync(id);
+                return Results.Ok();
             }
 
-            return Results.Unauthorized();
+            return Results.Conflict( new { error="شما دسترسی ندارید"});
+
 
 
         }).RequireAuthorization();
-        */
 
         
         

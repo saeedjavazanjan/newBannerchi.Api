@@ -12,9 +12,11 @@ public record PackageDto(
     string HeaderUrl,
     string PackageUrl,
     int  Price,
-    List<string>Category
+    string Category
    
 );
+
+
 public record AddPackageDto(
     string Name,
     string Designer,
@@ -24,14 +26,9 @@ public record AddPackageDto(
     string HeaderUrl,
     string PackageUrl,
     int  Price,
-    List<string>Category
+    string Category
    
 );
-
-
-
-
-
 public record UserDto(
     int Id,
     string Name,

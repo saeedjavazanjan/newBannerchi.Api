@@ -44,13 +44,13 @@ namespace NewBannerchi.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     Designer = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(2)", maxLength: 2, nullable: false),
-                    DownloadCount = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    DownloadCount = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Samples = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
-                    HeaderUrl = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    PackageUrl = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    HeaderUrl = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    PackageUrl = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Price = table.Column<int>(type: "int", nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                    Category = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {

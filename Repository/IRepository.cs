@@ -10,6 +10,7 @@ public interface IRepository
     Task<Package?> GetAsync(int id);
 
     Task<IEnumerable<Package>> GetAllAsync();
+   // Task<List<OldPackages>> GetOldAllAsync();
     
     Task<IEnumerable<Package>> GetPostersAsync();
     Task<IEnumerable<Package>> GetTempsAsync();
@@ -26,6 +27,20 @@ public interface IRepository
     Task<User?> GetRegesteredPhoneNumberAsync(string phoneNumber);
     Task AddUser (User user);
     Task DeleteUser(int id);
+
+    
+    //categories
+    Task<IEnumerable<Category>> GetAllCategoriesAsync();
+    Task CreateCategoryAsync(Category category);
+    Task DeleteCategoryAsync(int id);
+    Task<Category?> GetCategoryAsync(int id);
+ 
+    //occasions
+    Task<IEnumerable<Occasion>> GetAllOccasionsAsync();
+    Task CreateOccasionAsync(Occasion occasion);
+    Task DeleteOccasionAsync(int id);
+    Task<Occasion?> GetOccasionAsync(int id);
+
 
     
 }

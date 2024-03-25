@@ -11,7 +11,7 @@ docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=$sa_password" -p 5249:5249 -
 ```powerShell
 $sa_password="[SA PASSWORD HERE]"
 
-dotnet user-secrets set "ConnectionStrings:NewBannerchiContext" "server=localhost; Database=Bannerchi; User Id=sa1; Password=$sa_password;Trusted_Connection=True; TrustServerCertificate=True;"
+dotnet user-secrets set "ConnectionStrings:NewBannerchiContext" "server=localhost; Database=BannerchiDatabase; User Id=sa1; Password=$sa_password;Trusted_Connection=True; TrustServerCertificate=True;"
 
 ```
 
