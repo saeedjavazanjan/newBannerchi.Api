@@ -6,7 +6,7 @@ namespace NewBannerchi.Endpoints;
 
 public static class PackagesEndpoints
 {
-    private const  string SearchPost="Search";
+    private const  string SearchPackage="Search";
     private const  string Category="Category";
     public static RouteGroupBuilder MapPackagesEndpoints(this IEndpointRouteBuilder routes)
     {
@@ -30,7 +30,37 @@ public static class PackagesEndpoints
         });
         
         
+        routes.MapGet("/download_counting.php",
+            async (IRepository repository, 
+                    int id,
+                    int count)
+            =>
+        {
+            Package? existedPackage = await repository.GetAsync(id);
+
+
+            if (existedPackage != null)
+            {
+                existedPackage.DownloadCount =(Int32.Parse(existedPackage.DownloadCount)+1).ToString();
+                await  repository.UpdateAsync(existedPackage);
+                return Results.Ok();
+            }
+
+            return Results.NotFound(new{error="پکیج مورد نظر یافت نشد"}); 
+ 
+        });
+        routes.MapGet("/search.php", async (
+                IRepository repository,
+                string search)
+            =>
+        {
+            IEnumerable<Package> searchedPackages = await repository.SearchAsync(search);
+            return searchedPackages is not null ? Results.Ok(searchedPackages
+              .Select(post=>post.AsDto())):Results.NotFound();
+        });
         
+
+        //.
         
         
         group.MapGet("/posters", async (IRepository repository,int pageNumber,int pageSize) 
@@ -48,12 +78,12 @@ public static class PackagesEndpoints
 
         group.MapGet("/category", async (
                 IRepository repository,
-                string occasion,
+                string category,
                 int pageNumber,
                 int pageSize)
             =>
         {
-            IEnumerable<Package> categoryPackages = await repository.GetWithCategoryAsync(occasion);
+            IEnumerable<Package> categoryPackages = await repository.GetWithCategoryAsync(category);
             return categoryPackages is not null ? Results.Ok(categoryPackages
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -71,7 +101,7 @@ public static class PackagesEndpoints
             return searchedPosts is not null ? Results.Ok(searchedPosts
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize).Select(post=>post.AsDto())):Results.NotFound();
-        }).WithName(SearchPost);
+        }).WithName(SearchPackage);
         
         
            group.MapPost("/uploadPackage",async (

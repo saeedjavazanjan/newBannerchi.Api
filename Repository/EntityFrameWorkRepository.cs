@@ -54,16 +54,19 @@ public class EntityFrameWorkRepository(NewBannerchiContext dbContext) : IReposit
 
     }
     */
-
-   
+    
 
     public async Task<IEnumerable<Package>> GetPostersAsync()
     {
-        return await dbContext.Packages.Where(package => 
-                package.Type=="0" ||
-                package.Type=="1")
-            .ToListAsync();
-        
+         return await dbContext.Packages.Where(package =>
+            package.Type == "0" ||
+            package.Type == "1").ToListAsync();
+
+         /*return await PaginatedList<Package>.CreateAsync(dbContext.Packages.Where(package =>
+                 package.Type == "0" ||
+                 package.Type == "1").AsNoTracking(),
+             pageNumber ,
+             pageSize);*/
     }
    public async Task<IEnumerable<Package>> GetTempsAsync()
     {

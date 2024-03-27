@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EntityFrameworkCore.UseRowNumberForPaging;
+using Microsoft.EntityFrameworkCore;
 using NewBannerchi.Authentication;
 using NewBannerchi.Repository;
 
@@ -20,7 +21,7 @@ public static class DataExtensions
     )
     {
         var connString=configuration.GetConnectionString("NewBannerchiContext");
-        services.AddSqlServer<NewBannerchiContext>(connString)
+        services.AddSqlServer<NewBannerchiContext>(connString,builder => builder.UseRowNumberForPaging())
             .AddScoped<IRepository,EntityFrameWorkRepository>();
         return services;
 
