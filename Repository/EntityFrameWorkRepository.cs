@@ -89,10 +89,7 @@ public class EntityFrameWorkRepository(NewBannerchiContext dbContext) : IReposit
         IQueryable<Package> data = dbContext.Packages;
 
         return await data.Where(data =>
-                data.Name.Contains(query) ||
-                data.Category.Contains(query) ||
-                data.Designer.Contains(query))
-
+                data.Name.Contains(query) )
             .ToListAsync();    }
 
     public async Task<IEnumerable<Package>> GetWithCategoryAsync(string category)
@@ -102,8 +99,62 @@ public class EntityFrameWorkRepository(NewBannerchiContext dbContext) : IReposit
         return await data.Where(data => data.Category.Contains(category)).ToListAsync();
         
     }
-    
-    
+
+    public async Task<IEnumerable<Package>> GetFilteredPackagesAsync(  string searchTerm,string packageType)
+    {
+        searchTerm = searchTerm.Trim().ToLower();
+        packageType = packageType.Trim().ToLower();
+
+        IQueryable<Package> data = dbContext.Packages;
+        if (packageType.Equals("poster"))
+        {
+            if (searchTerm.Equals("همه"))
+            {
+                return await data.Where(
+                    data => 
+                        data.Type.Equals("0")||
+                        data.Type.Equals("1")
+                ).ToListAsync(); 
+            }
+            else
+            {
+                return await data.Where(
+                    data => 
+                       ( data.Type.Equals("0")||
+                        data.Type.Equals("1"))&&
+                        (data.Category.Contains(searchTerm)||
+                            data.Name.Contains(searchTerm)||
+                            data.Designer.Contains(searchTerm))
+                          
+                            ).ToListAsync();
+            }
+            
+        }
+        else 
+        {
+            if (searchTerm.Equals("همه"))
+            {
+                return await data.Where(
+                    data => 
+                        data.Type.Equals("3")
+                ).ToListAsync(); 
+            }
+            else
+            {
+                return await data.Where(
+                    data =>
+                        data.Type.Equals("3")&&
+                        (data.Category.Contains(searchTerm)||
+                            data.Name.Contains(searchTerm)||
+                            data.Designer.Contains(searchTerm))
+                ).ToListAsync();
+            }
+        }
+       
+        
+    }
+  
+
     //Users
     public async Task<User?> GetUserAsync(int id)
     {
@@ -128,14 +179,49 @@ public class EntityFrameWorkRepository(NewBannerchiContext dbContext) : IReposit
         dbContext.Users.Add(user);
         await dbContext.SaveChangesAsync();
     }
-    
+
+    public async Task AddUserOtp(UserOtp userOtp)
+    {
+        dbContext.UsersOtp.Add(userOtp);
+        await dbContext.SaveChangesAsync();
+        
+        
+    }
+
+    public async Task<UserOtp?> GetUserOtpAsync(string userPhoneNumber)
+    {
+        try
+        {
+            return await dbContext.UsersOtp.FirstOrDefaultAsync(userOtp => userOtp.PhoneNumber == userPhoneNumber);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
     public async Task DeleteUser(int id)
     {
         await dbContext.Users.Where(user => user.Id == id)
             .ExecuteDeleteAsync();
     }
-    
-    
+
+    public async Task UpdateUserOtpAsync(UserOtp userOtp)
+    {
+        dbContext.Update(userOtp);
+        await dbContext.SaveChangesAsync();
+        
+    }
+
+    public async Task DeleteUserOtpAsync(int id)
+    {
+        await dbContext.UsersOtp.Where(user => user.Id == id)
+            .ExecuteDeleteAsync();
+        
+    }
+
+
     //categories
     public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
     {

@@ -12,6 +12,8 @@ public static class CategoryEndpoints
 
 
         var group = routes.MapGroup("/categories").WithParameterValidation();
+        
+        
 
         //old version
         routes.MapGet("/titles.php", async (IRepository repository)

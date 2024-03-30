@@ -41,11 +41,25 @@ public static class EntityExtensions
         );
 
 
-    } public static CategoryDto AsDto(this Category category)
+    } 
+    public static CategoryDto AsDto(this Category category)
     {
         return new CategoryDto(
             category.Id,
             category.Name
+          
+        );
+
+
+    } 
+    public static UserOtpDto AsDto(this UserOtp userOtp)
+    {
+        return new UserOtpDto(
+            userOtp.Id,
+            userOtp.UserName,
+            userOtp.OtpPassword,
+            userOtp.PhoneNumber,
+            userOtp.Time
           
         );
 

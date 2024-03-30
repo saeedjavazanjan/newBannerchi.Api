@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NewBannerchi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+146bb40cbc7d599139ba98afe4759869fe0bb932")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a2ea47ff3b3b0177ae33a65215f8d35653ea9d50")]
 [assembly: System.Reflection.AssemblyProductAttribute("NewBannerchi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NewBannerchi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

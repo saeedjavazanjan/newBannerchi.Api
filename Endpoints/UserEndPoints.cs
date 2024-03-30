@@ -35,19 +35,40 @@ public static class UserEndPoints
         ).WithName(GetUser).RequireAuthorization();
         
         
-        group.MapPost("/register",async (
+        group.MapPost("/signUp",async (
             IRepository iRepository , 
             RegisterUserDto registerUserDto)=>
         {
-            generatedPassword = "1234";  //GenerateRandomNo();
+            generatedPassword = GenerateRandomNo();
+
+           
             
             User? existedUser = await iRepository.GetRegesteredPhoneNumberAsync(registerUserDto.PhoneNumber);
             if (existedUser is not null )
             {
                 return Results.Conflict(new{error="با این شماره قبلا ثبت نام صورت گرفته است."});
             }
+            
             else
             {
+                UserOtp userOtp = new()
+                {
+                    UserName = registerUserDto.Name,
+                    OtpPassword = generatedPassword,
+                    PhoneNumber = registerUserDto.PhoneNumber,
+                    Time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                };
+                UserOtp? existedUserOtp = await iRepository.GetUserOtpAsync(registerUserDto.PhoneNumber);
+                if (existedUserOtp is not null)
+                {
+                    existedUserOtp.OtpPassword = generatedPassword;
+                    await iRepository.UpdateUserOtpAsync(existedUserOtp);
+                }
+                else if(existedUserOtp is null)
+                {
+                    await iRepository.AddUserOtp(userOtp);
+
+                }
 
                 String result= await SendSms.SendSMS.SendSMSToUser(generatedPassword,registerUserDto.PhoneNumber);
 
@@ -63,17 +84,30 @@ public static class UserEndPoints
             }
         }) .RequireRateLimiting("fixed");
         
-        group.MapPost("/loginPasswordRequest", async (
+        group.MapPost("/signIn", async (
             IRepository iRepository,
             RegisterUserDto registerUserDto) =>
               {
-                  User? regesterdeUser = await iRepository.
+                  User? regesterdUser = await iRepository.
                       GetRegesteredPhoneNumberAsync(registerUserDto.PhoneNumber);
 
-                  if (regesterdeUser is not null)
+                  UserOtp? userOtp = await iRepository.GetUserOtpAsync(registerUserDto.PhoneNumber);
+
+                  if (regesterdUser is not null && userOtp is not null)
                   {
-                      generatedPassword = "1234";
-                      // generatedPassword =  GenerateRandomNo();
+                      
+                     // generatedPassword = "1234";
+                       generatedPassword =  GenerateRandomNo();
+
+                       UserOtp updatedUserOtp = new()
+                       {
+                           OtpPassword = generatedPassword,
+                           PhoneNumber = userOtp.PhoneNumber,
+                           UserName = userOtp.UserName,
+                           Time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                       };
+
+                       await iRepository.UpdateUserOtpAsync(updatedUserOtp);
                       String result= await SendSms.SendSMS.
                           SendSMSToUser(generatedPassword,
                               registerUserDto.PhoneNumber);
@@ -91,13 +125,24 @@ public static class UserEndPoints
                   
               }) .RequireRateLimiting("fixed");
       
-        group.MapPost("/loginPasswordCheck", async (
+        group.MapPost("/signInPasswordCheck", async (
             IJwtProvider iJwtProvider,
             IRepository iRepository,
             AddUserDto addUserDto
             ) =>
         {
-            if (addUserDto.Password == generatedPassword && generatedPassword != null)
+           UserOtp? userOtp= await iRepository.GetUserOtpAsync(addUserDto.PhoneNumber);
+           long currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+           long timeDistance = currentTime - userOtp!.Time;
+
+           if (timeDistance > 3600000)
+           {
+               return Results.Conflict(new { error="پسورد منقضی شده"});
+
+           }
+
+            if (addUserDto.Password == userOtp!.OtpPassword)
             {
                 
                 User? regesterdeUser = await iRepository.GetRegesteredPhoneNumberAsync(addUserDto.PhoneNumber);
@@ -120,13 +165,29 @@ public static class UserEndPoints
         });
         
         
-        group.MapPost("/registerPasswordCheck",async (
+        group.MapPost("/signUpPasswordCheck",async (
             IJwtProvider iJwtProvider,
             IRepository iRepository,
             AddUserDto addUserDto
             )=>{
+            UserOtp? userOtp= await iRepository.GetUserOtpAsync(addUserDto.PhoneNumber);
+            long currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-            if (addUserDto.Password == generatedPassword && generatedPassword != null)
+            if (userOtp ==null)
+            {
+                return Results.NotFound(new { error="یوزر یافت نشد"});
+
+            }
+            
+            long timeDistance = currentTime/1000 - ((userOtp!.Time)/1000);
+
+            if (timeDistance > 30000)
+            {
+                return Results.Conflict(new { error="پسورد منقضی شده"});
+
+            }
+
+            if (addUserDto.Password == userOtp!.OtpPassword )
             {
 
                 User user = new()
@@ -168,6 +229,12 @@ public static class UserEndPoints
             if(user is not null){
                 await repository.DeleteUser(id); 
             }
+            return Results.NoContent();   
+        });
+        group.MapDelete("userOtp/{id}",async (IRepository repository,int id)=>
+        {
+                await repository.DeleteUserOtpAsync(id); 
+            
             return Results.NoContent();   
         });
 

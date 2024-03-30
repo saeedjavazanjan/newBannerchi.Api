@@ -8,6 +8,7 @@ public static class PackagesEndpoints
 {
     private const  string SearchPackage="Search";
     private const  string Category="Category";
+    private static int pageSize = 10;
     public static RouteGroupBuilder MapPackagesEndpoints(this IEndpointRouteBuilder routes)
     {
 
@@ -60,8 +61,18 @@ public static class PackagesEndpoints
         });
         
 
-        //.
-        
+        //...
+
+
+        group.MapGet("filteredResult", async (
+            IRepository repository,
+            int pageNumber,
+            string search,
+            string type
+        ) =>(await repository.GetFilteredPackagesAsync(
+                search,type)).Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(package=>package.AsDto()));
         
         group.MapGet("/posters", async (IRepository repository,int pageNumber,int pageSize) 
             => (await repository.GetPostersAsync())
@@ -83,6 +94,15 @@ public static class PackagesEndpoints
                 int pageSize)
             =>
         {
+            if (category.Equals("همه"))
+            {
+                IEnumerable<Package> posters = await repository.GetPostersAsync();
+                return posters is not null ? Results.Ok(posters
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(package=>package.AsDto())):Results.NotFound();
+            }
+
             IEnumerable<Package> categoryPackages = await repository.GetWithCategoryAsync(category);
             return categoryPackages is not null ? Results.Ok(categoryPackages
                 .Skip((pageNumber - 1) * pageSize)

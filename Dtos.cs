@@ -9,8 +9,8 @@ public record PackageDto(
     string Type,
     string DownloadCount,
     string Samples,
-    string HeaderUrl,
-    string PackageUrl,
+    string HeaderURL,
+    string PackageURL,
     int  Price,
     string Category
    
@@ -60,4 +60,11 @@ public record CategoryDto(
 public record OccasionDto(
     int Id,
     string Name
+);
+public record UserOtpDto(
+    int Id,
+    string UserName,
+    string OtpPassword,
+    string UserPhoneNumber,
+    long Time
 );

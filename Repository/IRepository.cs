@@ -20,13 +20,23 @@ public interface IRepository
     Task<IEnumerable<Package>> SearchAsync(string query);
 
     Task<IEnumerable<Package>> GetWithCategoryAsync(string category);
-    
+
+    Task<IEnumerable<Package>> GetFilteredPackagesAsync(
+        string searchTerm,
+        string packageType
+    );
     
     //users
     Task<User?> GetUserAsync(int id);
     Task<User?> GetRegesteredPhoneNumberAsync(string phoneNumber);
     Task AddUser (User user);
     Task DeleteUser(int id);
+
+    Task AddUserOtp ( UserOtp userOtp);
+    Task<UserOtp?> GetUserOtpAsync(string userPhoneNumber);
+    Task UpdateUserOtpAsync(UserOtp userOtp);
+    Task DeleteUserOtpAsync(int id);
+
 
     
     //categories
