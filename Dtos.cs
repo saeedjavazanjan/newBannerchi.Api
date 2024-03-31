@@ -50,6 +50,9 @@ public record AddUserDto(
     [Required][StringLength(20)] string TypeOfPage,
     [StringLength(20)] string JobTitle
 );
+public record SignInUserDto(
+    [Required] [StringLength(12)] string PhoneNumber
+);
 
 
 public record CategoryDto(

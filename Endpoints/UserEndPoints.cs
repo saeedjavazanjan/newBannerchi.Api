@@ -62,6 +62,7 @@ public static class UserEndPoints
                 if (existedUserOtp is not null)
                 {
                     existedUserOtp.OtpPassword = generatedPassword;
+                    existedUserOtp.Time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                     await iRepository.UpdateUserOtpAsync(existedUserOtp);
                 }
                 else if(existedUserOtp is null)
@@ -86,12 +87,12 @@ public static class UserEndPoints
         
         group.MapPost("/signIn", async (
             IRepository iRepository,
-            RegisterUserDto registerUserDto) =>
+            SignInUserDto signInUserDto) =>
               {
                   User? regesterdUser = await iRepository.
-                      GetRegesteredPhoneNumberAsync(registerUserDto.PhoneNumber);
+                      GetRegesteredPhoneNumberAsync(signInUserDto.PhoneNumber);
 
-                  UserOtp? userOtp = await iRepository.GetUserOtpAsync(registerUserDto.PhoneNumber);
+                  UserOtp? userOtp = await iRepository.GetUserOtpAsync(signInUserDto.PhoneNumber);
 
                   if (regesterdUser is not null && userOtp is not null)
                   {
@@ -99,18 +100,20 @@ public static class UserEndPoints
                      // generatedPassword = "1234";
                        generatedPassword =  GenerateRandomNo();
 
-                       UserOtp updatedUserOtp = new()
+                       /*UserOtp updatedUserOtp = new()
                        {
                            OtpPassword = generatedPassword,
                            PhoneNumber = userOtp.PhoneNumber,
                            UserName = userOtp.UserName,
                            Time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-                       };
+                       };*/
+                       userOtp.OtpPassword = generatedPassword;
+                       userOtp.Time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-                       await iRepository.UpdateUserOtpAsync(updatedUserOtp);
+                       await iRepository.UpdateUserOtpAsync(userOtp);
                       String result= await SendSms.SendSMS.
                           SendSMSToUser(generatedPassword,
-                              registerUserDto.PhoneNumber);
+                              signInUserDto.PhoneNumber);
                       //  if (result.Equals("ارسال موفق"))
                       // {
                       return Results.Ok(result);
@@ -134,9 +137,9 @@ public static class UserEndPoints
            UserOtp? userOtp= await iRepository.GetUserOtpAsync(addUserDto.PhoneNumber);
            long currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-           long timeDistance = currentTime - userOtp!.Time;
+           long timeDistance = (currentTime/1000) - (userOtp!.Time/1000);
 
-           if (timeDistance > 3600000)
+           if (timeDistance > 60)
            {
                return Results.Conflict(new { error="پسورد منقضی شده"});
 
@@ -181,7 +184,7 @@ public static class UserEndPoints
             
             long timeDistance = currentTime/1000 - ((userOtp!.Time)/1000);
 
-            if (timeDistance > 30000)
+            if (timeDistance > 60)
             {
                 return Results.Conflict(new { error="پسورد منقضی شده"});
 
