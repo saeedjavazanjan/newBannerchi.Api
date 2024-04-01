@@ -131,30 +131,30 @@ public static class UserEndPoints
         group.MapPost("/signInPasswordCheck", async (
             IJwtProvider iJwtProvider,
             IRepository iRepository,
-            AddUserDto addUserDto
+            SignInUserDto signInUserDto
             ) =>
         {
-           UserOtp? userOtp= await iRepository.GetUserOtpAsync(addUserDto.PhoneNumber);
+           UserOtp? userOtp= await iRepository.GetUserOtpAsync(signInUserDto.PhoneNumber);
            long currentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
            long timeDistance = (currentTime/1000) - (userOtp!.Time/1000);
 
-           if (timeDistance > 60)
+           if (timeDistance > 120)
            {
                return Results.Conflict(new { error="پسورد منقضی شده"});
 
            }
 
-            if (addUserDto.Password == userOtp!.OtpPassword)
+            if (signInUserDto.Password == userOtp!.OtpPassword)
             {
                 
-                User? regesterdeUser = await iRepository.GetRegesteredPhoneNumberAsync(addUserDto.PhoneNumber);
+                User? regesterdeUser = await iRepository.GetRegesteredPhoneNumberAsync(signInUserDto.PhoneNumber);
 
                 if (regesterdeUser is not null)
                 {
                     var token=  await iJwtProvider.Generate(regesterdeUser);
                     // var userData=Results.CreatedAtRoute(GetUser,new {user.UserId},user);
-                    return Results.Ok(new{token=token,userData=regesterdeUser});
+                    return Results.Ok(token);
                     
                 }
 
@@ -184,7 +184,7 @@ public static class UserEndPoints
             
             long timeDistance = currentTime/1000 - ((userOtp!.Time)/1000);
 
-            if (timeDistance > 60)
+            if (timeDistance > 120)
             {
                 return Results.Conflict(new { error="پسورد منقضی شده"});
 
@@ -215,7 +215,7 @@ public static class UserEndPoints
                     await iRepository.AddUser(user);
                  var token=  await iJwtProvider.Generate(user);
                     // var userData=Results.CreatedAtRoute(GetUser,new {user.UserId},user);
-                  return Results.Ok(new{token=token,userData=user});
+                  return Results.Ok(token);
                 }
             }
             else

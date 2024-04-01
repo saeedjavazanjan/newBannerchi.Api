@@ -51,7 +51,8 @@ public record AddUserDto(
     [StringLength(20)] string JobTitle
 );
 public record SignInUserDto(
-    [Required] [StringLength(12)] string PhoneNumber
+    [Required] [StringLength(12)] string PhoneNumber,
+     [StringLength(4)] string Password
 );
 
 
