@@ -57,5 +57,5 @@ app.UseRateLimiter();
 app.MapPackagesEndpoints();
 app.MapCategoriesEndpoints();
 app.MapOccasionEndpoints();
-app.MapGet("/", () => "helloWorld");
+app.MapGet("version/", () =>Results.Ok( "1.1.0"));
 app.Run();

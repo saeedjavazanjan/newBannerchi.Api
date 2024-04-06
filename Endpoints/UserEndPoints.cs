@@ -92,9 +92,9 @@ public static class UserEndPoints
                   User? regesterdUser = await iRepository.
                       GetRegesteredPhoneNumberAsync(signInUserDto.PhoneNumber);
 
-                  UserOtp? userOtp = await iRepository.GetUserOtpAsync(signInUserDto.PhoneNumber);
+                  UserOtp? existedUserOto = await iRepository.GetUserOtpAsync(signInUserDto.PhoneNumber);
 
-                  if (regesterdUser is not null && userOtp is not null)
+                  if (regesterdUser is not null )
                   {
                       
                      // generatedPassword = "1234";
@@ -107,11 +107,26 @@ public static class UserEndPoints
                            UserName = userOtp.UserName,
                            Time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
                        };*/
-                       userOtp.OtpPassword = generatedPassword;
-                       userOtp.Time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                       if (existedUserOto is not null)
+                       {
+                           existedUserOto.OtpPassword = generatedPassword;
+                           existedUserOto.Time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-                       await iRepository.UpdateUserOtpAsync(userOtp);
-                      String result= await SendSms.SendSMS.
+                           await iRepository.UpdateUserOtpAsync(existedUserOto);
+                       }else if (existedUserOto is null)
+                       {
+                           UserOtp userOtp = new()
+                           {
+                               UserName = regesterdUser.Name,
+                               OtpPassword = generatedPassword,
+                               PhoneNumber = regesterdUser.PhoneNumber,
+                               Time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                           };
+                           await iRepository.AddUserOtp(userOtp);
+
+                       }
+
+                       String result= await SendSms.SendSMS.
                           SendSMSToUser(generatedPassword,
                               signInUserDto.PhoneNumber);
                       //  if (result.Equals("ارسال موفق"))
@@ -148,13 +163,14 @@ public static class UserEndPoints
             if (signInUserDto.Password == userOtp!.OtpPassword)
             {
                 
+                
                 User? regesterdeUser = await iRepository.GetRegesteredPhoneNumberAsync(signInUserDto.PhoneNumber);
 
                 if (regesterdeUser is not null)
                 {
                     var token=  await iJwtProvider.Generate(regesterdeUser);
-                    // var userData=Results.CreatedAtRoute(GetUser,new {user.UserId},user);
-                    return Results.Ok(token);
+                  //   var userData=Results.CreatedAtRoute(GetUser,new {user.UserId},user);
+                  return Results.Ok(new{tok=token,userData=regesterdeUser});
                     
                 }
 
@@ -215,7 +231,7 @@ public static class UserEndPoints
                     await iRepository.AddUser(user);
                  var token=  await iJwtProvider.Generate(user);
                     // var userData=Results.CreatedAtRoute(GetUser,new {user.UserId},user);
-                  return Results.Ok(token);
+                    return Results.Ok(new{tok=token,userData=regesterdeUser});
                 }
             }
             else
