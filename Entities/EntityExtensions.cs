@@ -65,4 +65,17 @@ public static class EntityExtensions
 
 
     }
+
+    public static DownloadDetailDto AsDto(this DownLoadDetail downLoadDetail)
+    {
+        return new DownloadDetailDto(
+            downLoadDetail.Id,
+            downLoadDetail.PackName,
+            downLoadDetail.PackId,
+            downLoadDetail.UserId,
+            downLoadDetail.UserPurchaseToken,
+            downLoadDetail.Time
+        );
+
+    }
 }

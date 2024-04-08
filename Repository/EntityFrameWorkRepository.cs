@@ -268,4 +268,14 @@ public class EntityFrameWorkRepository(NewBannerchiContext dbContext) : IReposit
     {
         return await dbContext.Occasions.FindAsync(id);
     }
+
+    
+    
+    //downloadDetail
+    public async Task AddDownloadDetail(DownLoadDetail downLoadDetail)
+    {
+        dbContext.DownLoadDetail.Add(downLoadDetail);
+        await dbContext.SaveChangesAsync();
+        
+    }
 }

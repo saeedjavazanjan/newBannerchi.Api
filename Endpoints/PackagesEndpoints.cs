@@ -63,6 +63,39 @@ public static class PackagesEndpoints
 
         //...
 
+        group.MapPost("/downLoadDetails", async (
+            IRepository repository,
+            SetDownloadDetailDto downloadDetailDto,
+            ClaimsPrincipal? user
+            ) => {
+            var userId= user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId is not null)
+            {
+                DownLoadDetail downLoadDetail = new()
+                {
+                    PackName = downloadDetailDto.PackName,
+                    PackId = downloadDetailDto.PackId,
+                    UserId = Int32.Parse( userId),
+                    UserPurchaseToken = downloadDetailDto.UserPurchaseToken,
+                    Time = DateTime.Now
+                };
+               await repository.AddDownloadDetail(downLoadDetail);
+               Package? existedPackage = await repository.GetAsync(downloadDetailDto.PackId);
+               if (existedPackage is not null)
+               {
+                   existedPackage.DownloadCount=(Int32.Parse(existedPackage.DownloadCount)+1).ToString();
+                   await  repository.UpdateAsync(existedPackage);
+                   return Results.Ok();  
+               }
+               return Results.NotFound(new{error="پک یافت نشد."});
+
+
+            }
+            return Results.Conflict(new{error="کاربر یافت نشد."});
+
+
+        }).RequireAuthorization();
 
         group.MapGet("filteredResult", async (
             IRepository repository,

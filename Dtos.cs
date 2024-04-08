@@ -72,3 +72,18 @@ public record UserOtpDto(
     string UserPhoneNumber,
     long Time
 );
+
+public record DownloadDetailDto(
+    int Id,
+    string PackName,
+    int PackId,
+    int UserId,
+    string UserPurchaseToken,
+    DateTime Time
+    );
+
+public record SetDownloadDetailDto(
+    [Required] [StringLength(30)]  string PackName,
+    [Required]  int PackId,
+    string UserPurchaseToken
+    );

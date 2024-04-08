@@ -50,7 +50,8 @@ public interface IRepository
     Task CreateOccasionAsync(Occasion occasion);
     Task DeleteOccasionAsync(int id);
     Task<Occasion?> GetOccasionAsync(int id);
-
-
     
+    //downloadsetail
+    Task AddDownloadDetail(DownLoadDetail downLoadDetail);
+
 }

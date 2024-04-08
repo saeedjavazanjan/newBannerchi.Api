@@ -18,6 +18,7 @@ public class NewBannerchiContext:DbContext
     public DbSet<Occasion> Occasions  => Set<Occasion>();
 
     public DbSet<UserOtp> UsersOtp => Set<UserOtp>();
+    public DbSet<DownLoadDetail> DownLoadDetail => Set<DownLoadDetail>();
 
     /*protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
